@@ -1,5 +1,7 @@
 package com.WeatherData;
 
+import java.io.InputStream;
+
 public class SearchTermLocation {
     public Coorrdinates coorrdinates;
     public String localName;
@@ -11,5 +13,6 @@ public class SearchTermLocation {
         this.localName = localName;
         this.country = country;
         this.state = state;
+        InputStream is = getClass().getResourceAsStream("");
     }
 }

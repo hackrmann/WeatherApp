@@ -4,16 +4,25 @@ import com.google.gson.*;
 import com.google.gson.reflect.*;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.helperclass.TimeHelper.convertUnixToLocal;
 
+
+//https://openweathermap.org/current#geocoding - Documentation for weather data
 public class Weather {
 
     private final static String API_KEY = "bf7a9e6aaf56e246ea97c1e932075910";
@@ -22,17 +31,16 @@ public class Weather {
 
     String weatherUnits;
 
-    final int searchQueryLimit = 3;
+    final int searchQueryLimit = 5;
 
     public Weather() {
-        this.location = "New York";
         this.defaultCoordinates = new Coorrdinates(40.7143, -74.006);
         this.weatherUnits = "metric";
     }
 
     public String dataUrlBuilder(Coorrdinates coorrdinates) {
-        return "http://api.openweathermap.org/data/2.5/weather?lat=" + defaultCoordinates.latitude +
-                "&lon=" + defaultCoordinates.longitude + "&appid=" + API_KEY
+        return "http://api.openweathermap.org/data/2.5/weather?lat=" + coorrdinates.latitude +
+                "&lon=" + coorrdinates.longitude + "&appid=" + API_KEY
                 + "&units=" + weatherUnits;
     }
 
@@ -51,16 +59,15 @@ public class Weather {
         Type mapListType = new TypeToken<ArrayList<Map<String, Object>>>() {
         }.getType();
         ArrayList<Map<String, Object>> listOfLocations = new Gson().fromJson(s, mapListType);
-
         return listOfLocations;
     }
 
-    public ArrayList<SearchTermLocation> getSearchResults() {
+    public ArrayList<SearchTermLocation> getSearchResults(String searchText) {
         ArrayList<SearchTermLocation> searchTermLocations = new ArrayList<>();
         try {
             StringBuilder result = new StringBuilder();
             Weather weather = new Weather();
-            URL url = new URL(weather.searchUrlBuilder("New York"));
+            URL url = new URL(weather.searchUrlBuilder(searchText));
             URLConnection connection = url.openConnection();
             BufferedReader reader = new BufferedReader(new InputStreamReader((connection.getInputStream())));
             String line;
@@ -88,11 +95,11 @@ public class Weather {
         return searchTermLocations;
     }
 
-    public void getWeatherData() {
+    public Map<String, Object> getWeatherData(Coorrdinates coorrdinates) {
         try {
             StringBuilder result = new StringBuilder();
             Weather weather = new Weather();
-            URL url = new URL(weather.dataUrlBuilder(defaultCoordinates));
+            URL url = new URL(weather.dataUrlBuilder(coorrdinates));
             URLConnection connection = url.openConnection();
             BufferedReader reader = new BufferedReader(new InputStreamReader((connection.getInputStream())));
             String line;
@@ -106,15 +113,23 @@ public class Weather {
 
             System.out.println(resultMapping.get("weather"));
 
-        } catch (Exception e) {
+            return resultMapping;
+        } catch (IOException e) {
             System.err.println(e.getMessage());
         }
+        return null;
     }
 
     public static void main(String[] args) {
         Weather weather = new Weather();
-        weather.getSearchResults();
+        ArrayList<SearchTermLocation> locations = weather.getSearchResults("London");
+        Coorrdinates coorrdinates = locations.get(0).coorrdinates;
         System.out.println("-----------------");
-        weather.getWeatherData();
+        Map<String, Object> weatherInfo = weather.getWeatherData(coorrdinates);
+
+        long currentTimeInUnixSeconds = (long) ((double) weatherInfo.get("dt"));
+        long timezone = (long) ((double)weatherInfo.get("timezone"));
+
+        System.out.println(convertUnixToLocal(currentTimeInUnixSeconds, timezone));
     }
 }
