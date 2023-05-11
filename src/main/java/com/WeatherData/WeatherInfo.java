@@ -1,13 +1,9 @@
 package com.WeatherData;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Map;
-import java.util.TimeZone;
+
+import static com.helperclass.TimeHelper.convertUnixToLocal;
 
 //https://openweathermap.org/current#geocoding - Documentation for weather data
 public class WeatherInfo {
@@ -17,10 +13,12 @@ public class WeatherInfo {
 
     String weatherDescription, weatherMain, iconCode;
     double temperature, feelsLike, minTemp, maxTemp, humidityPercentage;
-    int pressure, visibility;
+    double pressure;
+    double visibility;
     double windSpeed, windDeg;
     double cloudsAll;
     long currentTimeInUnixSeconds, timezone, sunriseTimeInUnixSeconds, sunsetTimeInUnixSeconds;
+    String currentTimeDateTimeZone, sunriseTime, sunsetTime;
     Map<String, Object> weatherInfo;
 
     public Map<String, Object> getStringObjectMap(String s) {
@@ -38,7 +36,6 @@ public class WeatherInfo {
         Map<String, Object> clouds = getStringObjectMap("clouds");
         Map<String, Object> sys = getStringObjectMap("sys");
 
-
         coorrdinates = new Coorrdinates((Double) coord.get("lat"), (Double) coord.get("lon"));
 
         weatherDescription = (String) weather.get("description");
@@ -49,10 +46,10 @@ public class WeatherInfo {
         feelsLike = (double) mainInfo.get("feels_like");
         minTemp = (double) mainInfo.get("temp_min");
         maxTemp = (double) mainInfo.get("temp_max");
-        pressure = (int) mainInfo.get("pressure");
+        pressure = (double) mainInfo.get("pressure");
         humidityPercentage = (double) mainInfo.get("humidity");
 
-        visibility = (int) weatherInfo.get("visibility");
+        visibility = (double) weatherInfo.get("visibility");
 
         windDeg = (double) wind.get("deg");
         windSpeed = (double) wind.get("speed");
@@ -62,6 +59,9 @@ public class WeatherInfo {
         sunriseTimeInUnixSeconds = (long) ((double) sys.get("sunrise"));
         sunsetTimeInUnixSeconds = (long) ((double) sys.get("sunset"));
 
+        currentTimeDateTimeZone = convertUnixToLocal(currentTimeInUnixSeconds, timezone);
+        sunriseTime = convertUnixToLocal(sunriseTimeInUnixSeconds, timezone).split(" ")[1];
+        sunsetTime = convertUnixToLocal(sunsetTimeInUnixSeconds, timezone).split(" ")[1];
 
     }
 }

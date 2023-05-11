@@ -1,0 +1,8 @@
+.label {
+    -fx-font-weight: bold;
+    -fx-font-family: "Sans-serif";
+    -fx-color: "white";
+}
+#mainAnchorPane {
+    -fx-background-image: url("loginBackground.jpg");
+}

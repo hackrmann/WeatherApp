@@ -8,6 +8,7 @@ public class SearchTermLocation {
     public String country;
     public String state;
 
+
     public SearchTermLocation(Coorrdinates coorrdinates, String localName, String country, String state) {
         this.coorrdinates = new Coorrdinates(coorrdinates);
         this.localName = localName;

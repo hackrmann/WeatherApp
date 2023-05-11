@@ -7,17 +7,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static com.helperclass.TimeHelper.convertUnixToLocal;
 
@@ -78,7 +70,6 @@ public class Weather {
             System.out.println(result);
 
             ArrayList<Map<String, Object>> resultMapping = jsonToArrayList(result.toString());
-
             for (Map<String, Object> location : resultMapping) {
                 searchTermLocations.add(new SearchTermLocation(
                         new Coorrdinates((Double) location.get("lat"), (Double) location.get("lon")),
@@ -86,9 +77,6 @@ public class Weather {
                         (String) location.get("country"),
                         (String) location.get("state")));
             }
-
-            System.out.println(resultMapping.toString());
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -96,6 +84,7 @@ public class Weather {
     }
 
     public Map<String, Object> getWeatherData(Coorrdinates coorrdinates) {
+        Map<String, Object> resultMapping = null;
         try {
             StringBuilder result = new StringBuilder();
             Weather weather = new Weather();
@@ -108,28 +97,23 @@ public class Weather {
             }
             reader.close();
             System.out.println(result);
-
-            Map<String, Object> resultMapping = jsonToMap(result.toString());
-
-            System.out.println(resultMapping.get("weather"));
-
-            return resultMapping;
+            resultMapping = jsonToMap(result.toString());
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
-        return null;
+        return resultMapping;
     }
 
     public static void main(String[] args) {
         Weather weather = new Weather();
-        ArrayList<SearchTermLocation> locations = weather.getSearchResults("London");
+        ArrayList<SearchTermLocation> locations = weather.getSearchResults("Chennai");
         Coorrdinates coorrdinates = locations.get(0).coorrdinates;
         System.out.println("-----------------");
         Map<String, Object> weatherInfo = weather.getWeatherData(coorrdinates);
+        WeatherInfo weatherInfo1 = new WeatherInfo(weatherInfo);
 
         long currentTimeInUnixSeconds = (long) ((double) weatherInfo.get("dt"));
-        long timezone = (long) ((double)weatherInfo.get("timezone"));
-
+        long timezone = (long) ((double) weatherInfo.get("timezone"));
         System.out.println(convertUnixToLocal(currentTimeInUnixSeconds, timezone));
     }
 }
